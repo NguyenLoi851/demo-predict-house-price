@@ -1,77 +1,301 @@
-import axios from "axios"
-import { useContext, useEffect, useState } from "react"
-import { HouseInfoContext } from "../context/houseInfo"
+import axios from "axios";
+import { useContext, useEffect, useState } from "react";
+import { HouseInfoContext } from "../context/houseInfo";
+import {
+  InputNumber,
+  Select,
+  Form,
+  Typography,
+  Button,
+  notification,
+  Row,
+  Col,
+} from "antd";
 
 export const HomePage = () => {
-    const { houseInfo, setHouseInfo } = useContext(HouseInfoContext)
+  const { houseInfo, setHouseInfo } = useContext(HouseInfoContext);
+  const [model, setModel] = useState(null);
+  const [price, setPrice] = useState(null);
 
-    const handlePredict = async () => {
-        const apiUrl = "http://127.0.0.1:8000/model"
-        const param = houseInfo
-        const result = await axios.post(apiUrl,param)
-        console.log(result)
-        console.log(houseInfo)
+  const { Title } = Typography;
+
+  const legalDocumentsOptions = [
+    { value: "Đã có sổ", label: "Đã có sổ" },
+    { value: "Đang chờ sổ", label: "Đang chờ sổ" },
+    { value: "Giấy tờ khác", label: "Giấy tờ khác" },
+  ];
+  const typeHouseOptions = [
+    { value: "Nhà ngõ", label: "Nhà ngõ" },
+    { value: "Nhà mặt phố", label: "Nhà mặt phố" },
+    { value: "Nhà biệt thự", label: "Nhà biệt thự" },
+    { value: "Nhà phố liền kề", label: "Nhà phố liền kề" },
+  ];
+  const furnitureStatusOptions = [
+    { value: "Nội thất đầy đủ", label: "Nội thất đầy đủ" },
+    { value: "Nội thất cao cấp", label: "Nội thất cao cấp" },
+    { value: "Hoàn thiện cơ bản", label: "Hoàn thiện cơ bản" },
+    { value: "Bàn giao thô", label: "Bàn giao thô" },
+  ];
+  const locationOptions = [
+    { value: "Hà Nội", label: "Hà Nội" },
+    { value: "Hồ Chí Minh", label: "Hồ Chí Minh" },
+  ];
+  const modelOptions = [
+    { value: "decision_tree", label: "Decision Tree" },
+    { value: "random_forest", label: "Random Forest" },
+    { value: "xgboost", label: "XGBoost" },
+    { value: "lightgbm", label: "LightGBM" },
+    { value: "linear_regression", label: "Linear Regression" },
+    { value: "lasso_regression", label: "Lasso Regression" },
+    { value: "ridge_regression", label: "Ridge Regression" },
+  ];
+  const listNotify = [
+    {
+      message: "Data Error",
+      description: "Please fill in all fields",
+      duration: 2,
+    },
+    {
+      message: "Error",
+      description: "Unknown error exists",
+      duration: 2,
+    },
+    {
+      message: "Request Error",
+      description: "Please check request error",
+      duration: 2,
+    },
+  ];
+
+  const openNotification = (index: number) => {
+    notification.error(listNotify[index]);
+  };
+  const handleChange = (e: any, name: any) => {
+    setHouseInfo({ ...houseInfo, [name]: e });
+  };
+  const handlePredict = async (e: any) => {
+    const apiUrl = `http://127.0.0.1:8000/${model}`;
+    const param = houseInfo;
+    try {
+      const res = await axios.post(apiUrl, param);
+      if (res.status === 200) {
+        const predictPrice = res.data;
+        setPrice(predictPrice);
+      } else {
+        openNotification(1);
+      }
+    } catch (error) {
+      openNotification(2);
     }
-    
-    return (
-        <div>
-            <div>
-                Diện tích đất: <input placeholder="(m2)" onChange={e => setHouseInfo({ ...houseInfo, Area: e.target.value })}></input>
-            </div>
-            <div>
-                Diện tích sử dụng: <input placeholder="(m2)" onChange={e => setHouseInfo({ ...houseInfo, Useable_area: e.target.value })}></input>
-            </div>
-            <div>
-                Số phòng ngủ: <input type="number" placeholder="v.d. 3 (phòng)" onChange={e => setHouseInfo({ ...houseInfo, Number_of_bedroom: e.target.value })}></input>
-            </div>
-            <div>
-                Số phòng vệ sinh: <input type="number" placeholder="v.d. 4 (phòng)" onChange={e => setHouseInfo({ ...houseInfo, bathroomNumber: e.target.value })}></input>
-            </div>
-            <div>
-                Tổng số tầng: <input type="number" placeholder="v.d. 5 (tầng)" onChange={e => setHouseInfo({ ...houseInfo, floorNumber: e.target.value })}></input>
-            </div>
-            <div>
-                <label htmlFor="legalDocuments">Giấy tờ pháp lý: </label>
-                <select name="legalDocuments" onChange={e => setHouseInfo({...houseInfo, legalDocuments: e.target.value})}>
-                    <option value="nan">nan</option>
-                    <option value="Đã có sổ'">Đã có sổ'</option>
-                    <option value="Đang chờ sổ'">Đang chờ sổ'</option>
-                    <option value="Giấy tờ khác">Giấy tờ khác</option>
-                </select>
-            </div>
-            <div>
-                <label htmlFor="houseType">Loại hình nhà ở: </label>
-                <select name="houseType" onChange={e => setHouseInfo({...houseInfo, Type_of_house: e.target.value})}>
-                    <option value="nan">nan</option>
-                    <option value="Nhà ngõ">Nhà ngõ</option>
-                    <option value="Nhà mặt phố">Nhà mặt phố</option>
-                    <option value="Nhà biệt thự">Nhà biệt thự</option>
-                    <option value="Nhà phố liền kề">Nhà phố liền kề</option>
-                </select>
-            </div>
-            <div>
-                <label htmlFor="furnitureStatus">Tình trạng nội thất: </label>
-                <select name="furnitureStatus" onChange={e => setHouseInfo({...houseInfo, furnitureStatus: e.target.value})}>
-                    <option value="nan">nan</option>
-                    <option value="Nội thất đầy đủ">Nội thất đầy đủ</option>
-                    <option value="Nội thất cao cấp">Nội thất cao cấp</option>
-                    <option value="Hoàn thiện cơ bả">Hoàn thiện cơ bản</option>
-                    <option value="Bàn giao thô">Bàn giao thô</option>
-                </select>
-            </div>
-            <div>
-                <label htmlFor="location">Địa chỉ: </label>
-                <select name="location" onChange={e => setHouseInfo({...houseInfo, location: e.target.value})}>
-                    <option value="Hà Nội">Hà Nội</option>
-                    <option value="Hồ Chí Minh">Hồ Chí Minh</option>
-                </select>
-            </div>
-            <button onClick={handlePredict}>
-                Submit
-            </button>
-            <div>
-                Price: {houseInfo.price}
-            </div>
-        </div>
-    )
-}
+  };
+
+  return (
+    <>
+      <Title>Predict House Price Demo</Title>
+      <Form
+        labelCol={{ span: 8 }}
+        wrapperCol={{ span: 16 }}
+        style={{ width: 600 }}
+        onFinish={handlePredict}
+        onFinishFailed={(e) => openNotification(0)}
+      >
+        <Form.Item
+          label=" Diện tích đất"
+          name="Area"
+          rules={[
+            {
+              required: true,
+              message: "Please input area!",
+            },
+          ]}
+        >
+          <InputNumber
+            addonAfter="m2"
+            placeholder="Please input"
+            min={0}
+            value={houseInfo.Area || null}
+            onChange={(e) => handleChange(e, "Area")}
+          ></InputNumber>
+        </Form.Item>
+        <Form.Item
+          label=" Diện tích sử dụng"
+          name="Useable_area"
+          rules={[
+            {
+              required: true,
+              message: "Please input useable area!",
+            },
+          ]}
+        >
+          <InputNumber
+            addonAfter="m2"
+            placeholder="Please input"
+            min={0}
+            value={houseInfo.Useable_area || null}
+            onChange={(e) => handleChange(e, "Useable_area")}
+          ></InputNumber>
+        </Form.Item>
+        <Form.Item
+          label="Số phòng ngủ"
+          name="Number_of_bedroom"
+          rules={[
+            {
+              required: true,
+              message: "Please input number of bedroom!",
+            },
+          ]}
+        >
+          <InputNumber
+            addonAfter="phòng"
+            placeholder="Please input"
+            min={0}
+            value={houseInfo.Number_of_bedroom || 0}
+            onChange={(e) => handleChange(e, "Number_of_bedroom")}
+          ></InputNumber>
+        </Form.Item>
+        <Form.Item
+          label="Số phòng vệ sinh"
+          name="bathroomNumber"
+          rules={[
+            {
+              required: true,
+              message: "Please input number of bathroom!",
+            },
+          ]}
+        >
+          <InputNumber
+            addonAfter="phòng"
+            placeholder="Please input"
+            min={0}
+            value={houseInfo.bathroomNumber || 0}
+            onChange={(e) => handleChange(e, "bathroomNumber")}
+          ></InputNumber>
+        </Form.Item>
+        <Form.Item
+          label="Tổng số tầng"
+          name="floorNumber"
+          rules={[
+            {
+              required: true,
+              message: "Please input number of floor!",
+            },
+          ]}
+        >
+          <InputNumber
+            addonAfter="tầng"
+            placeholder="Please input"
+            min={1}
+            value={houseInfo.floorNumber || 1}
+            onChange={(e) => handleChange(e, "floorNumber")}
+          ></InputNumber>
+        </Form.Item>
+        <Form.Item
+          label="Giấy tờ pháp lý"
+          name="legalDocuments"
+          rules={[
+            {
+              required: true,
+              message: "Please select legal documents!",
+            },
+          ]}
+        >
+          <Select
+            style={{ width: "100%" }}
+            value={houseInfo.legalDocuments || null}
+            options={legalDocumentsOptions}
+            placeholder="Please select"
+            onChange={(e) => handleChange(e, "legalDocuments")}
+          ></Select>
+        </Form.Item>
+        <Form.Item
+          label="Loại hình nhà ở"
+          name="Type_of_house"
+          rules={[
+            {
+              required: true,
+              message: "Please select type of houses!",
+            },
+          ]}
+        >
+          <Select
+            style={{ width: "100%" }}
+            value={houseInfo.Type_of_house || null}
+            options={typeHouseOptions}
+            placeholder="Please select"
+            onChange={(e) => handleChange(e, "Type_of_house")}
+          ></Select>
+        </Form.Item>
+        <Form.Item
+          label="Tình trạng nội thất"
+          name="furnitureStatus"
+          rules={[
+            {
+              required: true,
+              message: "Please select furniture status!",
+            },
+          ]}
+        >
+          <Select
+            style={{ width: "100%" }}
+            value={houseInfo.furnitureStatus || null}
+            options={furnitureStatusOptions}
+            placeholder="Please select"
+            onChange={(e) => handleChange(e, "furnitureStatus")}
+          ></Select>
+        </Form.Item>
+        <Form.Item
+          label="Địa chỉ"
+          name="location"
+          rules={[
+            {
+              required: true,
+              message: "Please select location!",
+            },
+          ]}
+        >
+          <Select
+            style={{ width: "100%" }}
+            value={houseInfo.location || null}
+            options={locationOptions}
+            placeholder="Please select"
+            onChange={(e) => handleChange(e, "location")}
+          ></Select>
+        </Form.Item>
+        <Form.Item
+          label="Lựa chọn Model"
+          name="model"
+          rules={[
+            {
+              required: true,
+              message: "Please select model!",
+            },
+          ]}
+        >
+          <Select
+            style={{ width: "100%" }}
+            value={model || null}
+            options={modelOptions}
+            placeholder="Please select"
+            onChange={(e) => setModel(e)}
+          ></Select>
+        </Form.Item>
+        <Form.Item>
+          <Button type="primary" htmlType="submit">
+            Submit
+          </Button>
+        </Form.Item>
+      </Form>
+      <Row>
+        <Col span={8}>
+          <Title>Price:</Title>
+        </Col>
+        <Col span={16}>
+          <Title>
+            {price}
+            {price ? " $" : ""}
+          </Title>
+        </Col>
+      </Row>
+    </>
+  );
+};

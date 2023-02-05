@@ -4,9 +4,9 @@
   line-height: 24px;
   font-weight: 400;
 
-  color-scheme: light dark;
+  /* color-scheme: light dark; */
   color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  /* background-color: #242424; */
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -54,6 +54,18 @@ button:hover {
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
+}
+
+.ant-input-group-addon {
+  width: 70px !important;
+}
+
+.ant-input-number-group-addon {
+  min-width: 70px !important;
+}
+
+.ant-input-number-group-wrapper {
+  width: 100% !important;
 }
 
 @media (prefers-color-scheme: light) {
