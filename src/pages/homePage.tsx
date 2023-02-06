@@ -79,7 +79,7 @@ export const HomePage = () => {
     try {
       const res = await axios.post(apiUrl, param);
       if (res.status === 200) {
-        const predictPrice = res.data;
+        const predictPrice = res.data.toFixed(3);
         setPrice(predictPrice);
       } else {
         openNotification(1);
@@ -90,7 +90,7 @@ export const HomePage = () => {
   };
 
   return (
-    <>
+    <div className="container">
       <Title>Predict House Price Demo</Title>
       <Form
         labelCol={{ span: 8 }}
@@ -292,10 +292,10 @@ export const HomePage = () => {
         <Col span={16}>
           <Title>
             {price}
-            {price ? " $" : ""}
+            {price ? " triệu VNĐ" : ""}
           </Title>
         </Col>
       </Row>
-    </>
+    </div>
   );
 };
