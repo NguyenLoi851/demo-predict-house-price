@@ -291,8 +291,7 @@ export const HomePage = () => {
         </Col>
         <Col span={16}>
           <Title>
-            {price}
-            {price ? " triệu VNĐ" : ""}
+            {Number(price) < 1000 ? `${Number(price).toFixed()} triệu VNĐ` : `${(Number(price) / 1000).toFixed(3)} tỷ VNĐ`}
           </Title>
         </Col>
       </Row>
